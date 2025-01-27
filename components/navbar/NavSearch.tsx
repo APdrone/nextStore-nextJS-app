@@ -14,7 +14,6 @@ export default function NavSearch() {
 
     const handleSearch = useDebouncedCallback((value: string) => {
         const params = new URLSearchParams(searchParams);
-        console.log('params--', params.toString())
         if (value) {
             params.set('search', value)
         } else {

@@ -9,4 +9,4 @@ const ProductsPage = ({ searchParams }: { searchParams: { layout?: string, searc
     )
 }
 
-export default ProductsPage
+export default ProductsPage;

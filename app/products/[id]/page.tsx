@@ -4,16 +4,24 @@ import AddToCart from "@/components/single-product/AddToCart";
 import Breadcrumbs from "@/components/single-product/Breadcrumbs";
 import { ProductRating } from "@/components/single-product/productRating";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { fetchSingleProduct } from "@/utils/actions";
+import { fetchSingleProduct, findExistingReviews } from "@/utils/actions";
 import { formatCurrency } from "@/utils/format";
 import Image from "next/image";
 import Link from "next/link";
+import ShareButton from "@/components/single-product/Share";
+import SubmitReview from "@/components/reviews/SubmitReview";
+import ProductReviews from "@/components/reviews/ProductReviews";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function page({ params: { id } }: { params: { id: string } }) {
     const product = await fetchSingleProduct(id);
 
     const { image, name, company, description, price } = product;
     const dollarAmount = formatCurrency(price);
+
+    const { userId } = auth();
+
+    const reviewDoesNotExist = userId && !(await findExistingReviews(userId, product.id))
 
     return (
         <section>
@@ -30,7 +38,11 @@ export default async function page({ params: { id } }: { params: { id: string } 
                 <div>
                     <div className="flex gap-x-8 items-center ">
                         <h1 className="capitalize text-3xl font-bold">{name}</h1>
-                        <FavoriteToggleButton productId={id} />
+                        <div className="flex items-center gap-x-2">
+                            <FavoriteToggleButton productId={id} />
+                            <ShareButton name={product.name} productId={id} />
+                        </div>
+
                     </div>
                     <ProductRating productId={id} />
                     <h4 className="text-xl mt-2">{company}</h4>
@@ -44,7 +56,11 @@ export default async function page({ params: { id } }: { params: { id: string } 
                 </div>
 
             </div>
-
+            <ProductReviews productId={id} />
+            {
+                reviewDoesNotExist &&
+                <SubmitReview productId={id} />
+            }
         </section>
     )
 }
